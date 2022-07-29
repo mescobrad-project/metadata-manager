@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: pg-metadatamanager
+    app: metadatamanager
+    metadatamanager.component: pg-metadatamanager
+  name: pg-metadatamanager-data
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

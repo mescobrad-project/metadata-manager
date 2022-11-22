@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    io.kompose.service: swagger-metadatamanager
+    app: metadatamanager
+    metadatamanager.component: swagger-metadatamanager
+  name: swagger-metadatamanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: swagger-metadatamanager
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.network: "true"
+        io.kompose.service: swagger-metadatamanager
+        app: metadatamanager
+        metadatamanager.component: swagger-metadatamanager
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - env:
+        - name: API_URL
+          value: http://server-metadatamanager:3000
+        image: swaggerapi/swagger-ui:latest
+        imagePullPolicy: "Always"
+        name: swagger-metadatamanager
+        ports:
+        - containerPort: 8095

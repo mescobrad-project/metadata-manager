@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    io.kompose.service: server-metadatamanager
+    app: metadatamanager
+    metadatamanager.component: server-metadatamanager
+  name: metadatamanager
+spec:
+  host: api-metadata$URL
+  port:
+    targetPort: '3000'
+  to:
+    kind: Service
+    name: server-metadatamanager
+    weight: 100
+  wildcardPolicy: None
+

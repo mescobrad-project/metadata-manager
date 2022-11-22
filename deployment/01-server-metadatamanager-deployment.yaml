@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    io.kompose.service: server-metadatamanager
+    app: metadatamanager
+    metadatamanager.component: server-metadatamanager
+  name: server-metadatamanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: server-metadatamanager
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.network: "true"
+        io.kompose.service: server-metadatamanager
+        app: metadatamanager
+        metadatamanager.component: server-metadatamanager
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: metadatamanager-secrets
+              key: metadatamanager-postgres-password
+        - name: PGRST_DB_URI
+          value: postgres://postgres:${POSTGRES_PASSWORD}@pg-metadatamanager:5432/postgres
+        - name: PGRST_DB_SCHEMA
+          value: public
+        - name: PGRST_DB_ANON_ROLE
+          value: anon
+        - name: PGRST_OPENAPI_SERVER_PROXY_URI
+          value: https://api-metadata$URL
+        image: postgrest/postgrest:v9.0.0
+        imagePullPolicy: "Always"
+        name: server-metadatamanager
+        ports:
+        - containerPort: 3000

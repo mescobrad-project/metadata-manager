@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: pg-metadatamanager
+    app: metadatamanager
+    metadatamanager.component: pg-metadatamanager
+  name: pg-metadatamanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: pg-metadatamanager
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: pg-metadatamanager
+        app: metadatamanager
+        metadatamanager.component: pg-metadatamanager
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: metadatamanager-secrets
+              key: metadatamanager-postgres-password
+        - name: POSTGRES_DB
+          value: postgres
+        - name: DB_ANON_ROLE
+          value: anon
+        - name: DB_SCHEMA
+          value: public
+        image: postgres:14.1-alpine
+        name: postgresql-metadatamanager
+        ports:
+        - containerPort: 5432
+        resources: {}
+        volumeMounts:
+        - name: pg-metadatamanager-files
+          mountPath: /docker-entrypoint-initdb.d/metadata.sql
+          subPath: metadata.sql
+        - name: pg-metadatamanager-files
+          mountPath: /docker-entrypoint-initdb.d/create-anon-role.sh
+          subPath: create-anon-role.sh
+        - mountPath: /var/lib/pgsql/data
+          name: pg-metadatamanager-data
+      volumes:
+      - name: pg-metadatamanager-data
+        persistentVolumeClaim:
+          claimName: pg-metadatamanager-data
+      - name: pg-metadatamanager-files
+        configMap:
+          name: pg-metadatamanager-files
+
